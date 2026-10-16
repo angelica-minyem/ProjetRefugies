@@ -47,3 +47,5 @@ refugies = pd.DataFrame([{"year": entree["year"],
 
 # Conversion en numérique pour permettre les opérations statistiques
 refugies["nb_refugies"] = pd.to_numeric(refugies["nb_refugies"])
+
+print(refugies)
