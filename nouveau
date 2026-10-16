@@ -1,0 +1,66 @@
+url = "https://www.cepii.fr/DATA_DOWNLOAD/gravity/data/Gravity_csv_V202211.zip"
+
+zip_path = "Gravity_csv_V202211.zip"
+
+extract_dir = "data/gravity"
+
+
+
+if not os.path.exists(zip_path):
+
+    print("Téléchargement en cours...")
+
+    response = requests.get(url, stream=True)
+
+    with open(zip_path, "wb") as f:
+
+        for chunk in response.iter_content(chunk_size=8192):
+
+            f.write(chunk)
+
+    print("Téléchargement terminé.")
+
+
+
+# Extraction
+
+if not os.path.exists(extract_dir):
+
+    print("Extraction...")
+
+    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+
+        zip_ref.extractall(extract_dir)
+
+    print("Fichiers extraits dans :", extract_dir)
+
+import pandas as pd
+
+
+
+cols_utiles = [
+
+    "year", "iso3_o", "iso3_d", 
+
+    "distw_harmonic", "contig", "comlang_off", 
+
+    "gdp_ppp_pwt_o", "gdp_ppp_pwt_d"
+
+]
+
+
+
+
+df = pd.read_csv(
+
+    "data/gravity/Gravity_V202211.csv", 
+
+    usecols=cols_utiles,
+
+    low_memory=False
+
+)
+
+
+
+'df = df[df["year"] >= 1990]
