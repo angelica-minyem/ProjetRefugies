@@ -8,7 +8,7 @@ params = {"limit": 3000, "page": 1}
 req = requests.get(URL, params = params)
 regions_brut= req.json()
 
-regions = pd.DataFrame([{"id": region["id"], "name": region["name"], "name_fr": region["name_fr"]}
+regions = pd.DataFrame([{"id": region["id"], "name": region["name"]}
                         for region in regions_brut["items"]])
 
 regions = regions.sort_values(axis = 0, by = "id").reset_index(drop = True)
@@ -22,30 +22,50 @@ params2= {"limit": 300, "page": 1}
 req2 = requests.get(URL2, params = params2)
 pays_brut = req2.json()
 
-countries = pd.DataFrame([{"id": country["id"], "code": country["code"], "iso": country["iso"],
-                        "name": country["name"], "nameFr": country["nameFr"], 
-                        "region": country["region"], "regionFr": country["regionFr"]} 
-                        for country in pays_brut["items"] ])
+countries = pd.DataFrame([{"id": country["id"], 
+                        "iso": country["iso"],
+                        "name": country["name"],
+                        "region": country["region"]} 
+                        for country in pays_brut["items"]])
 
 
 # Récupération du nombre de réfugiés présents en fin d'année
 # coo = country of origin ; coa = country of asylum
 # coo_all=True et coa_all=True permettent de récupérer toutes les paires origine-destination
 URL3 = "https://api.unhcr.org/population/v1/population"
-params3= {"limit": 300, "page": 1, "yearFrom": 2020, "yearTo": 2020, 
-            "coo_all" : True, "coa_all" : True }
 
-req3 = requests.get(URL3, params= params3)
-refugies_brut = req3.json()
+params3 = {"limit": 300, "page": 1, 
+            "yearFrom": 2017, "yearTo": 2020,
+            "coo_all": True, "coa_all": True}
 
-refugies = pd.DataFrame([{"year": entree["year"], 
-                        "coo_id": entree["coo_id"], "coo_name" : entree["coo_name"], "coo": entree["coo"], "coo_iso": entree["coo_iso"],
-                        "coa_id": entree["coa_id"], "coa_name" : entree["coa_name"], "coa": entree["coa"], "coa_iso": entree["coa_iso"],
-                        "nb_refugies": entree["refugees"],
-                        "demandeurs_asiles": entree["asylum_seekers"]} for entree in refugies_brut["items"] 
-                        ])
+refugees_raw = []
+max_pages = requests.get(URL3, params=params3).json()["maxPages"]
+
+for page in range(1, max_pages + 1):
+    params3["page"] = page
+    data = requests.get(URL3, params=params3).json()
+    refugees_raw.extend(data["items"])
+
+selected_var = ["year", "coo_iso", "coo_name", "coa_iso", "coa_name", "refugees", "asylum_seekers"]
+refugees = pd.DataFrame(refugees_raw)[selected_var]
 
 # Conversion en numérique pour permettre les opérations statistiques
-refugies["nb_refugies"] = pd.to_numeric(refugies["nb_refugies"])
 
-print(refugies)
+refugees["refugees"] = pd.to_numeric(refugees["refugees"])
+refugees["asylum_seekers"] = pd.to_numeric(refugees["asylum_seekers"])
+
+# Ajout de la région du pays d'origine
+
+mixed_df = refugees.merge(countries[["iso", "region"]],
+                        left_on="coo_iso", right_on="iso", how="left")
+
+print(mixed_df.head(3))
+
+
+# Région d'origine totalisant le plus de demandeurs d'asile
+print(
+    mixed_df.groupby("region")["asylum_seekers"].sum().idxmax()
+)
+
+
+
