@@ -66,6 +66,3 @@ print(mixed_df.head(3))
 print(
     mixed_df.groupby("region")["asylum_seekers"].sum().idxmax()
 )
-
-
-

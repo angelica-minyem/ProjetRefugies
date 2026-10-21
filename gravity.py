@@ -19,13 +19,13 @@ comparaison = pd.read_csv(
 
 
 
-df = df[df["year"] == 2017]
-df=df[df["iso3_o"]!=df["iso3_d"]]
+comparaison = comparaison[comparaison["year"] == 2017]
+comparaison=comparaison[comparaison["iso3_o"]!=comparaison["iso3_d"]]
 
-df['contig'] = df['contig'].replace(0, False)
-df['comlang_off'] = df['comlang_off'].replace(0, False)
-df['comcol'] = df['comcol'].replace(0, False)
-df['contig'] = df['contig'].replace(1, True)
-df['comlang_off'] = df['comlang_off'].replace(1, True)
-df['comcol'] = df['comcol'].replace(1, True)
-print(df)
+comparaison['contig'] = comparaison['contig'].replace(0, False)
+comparaison['comlang_off'] = comparaison['comlang_off'].replace(0, False)
+comparaison['comcol'] = comparaison['comcol'].replace(0, False)
+comparaison['contig'] = comparaison['contig'].replace(1, True)
+comparaison['comlang_off'] = comparaison['comlang_off'].replace(1, True)
+comparaison['comcol'] = comparaison['comcol'].replace(1, True)
+print(comparaison)
