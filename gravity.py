@@ -11,7 +11,7 @@ cols_utiles = ["year", "iso3_o", "iso3_d", "distw_harmonic", "contig", "comlang_
 
 
 
-df = pd.read_csv(
+comparaison = pd.read_csv(
     url, 
     usecols=cols_utiles,
     low_memory=False
