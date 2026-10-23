@@ -15,7 +15,7 @@ cepii_df = pd.read_csv(
     url, 
     usecols=cols_utiles,
     low_memory=False
-)
+).rename(columns = {"gdp_ppp_pwt_o": "gdp_o", "gdp_ppp_pwt_d" : "gdp_d"})
 
 
 

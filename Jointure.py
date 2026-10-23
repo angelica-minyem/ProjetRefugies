@@ -12,10 +12,8 @@ df_cepii["year"] = df_cepii["year"].astype(int)
 df_jointure = pd.merge(df_unhcr,df_cepii,
     left_on=["year", "coo_iso", "coa_iso"],
     right_on=["year", "iso3_o", "iso3_d"],
-    how="inner",
-)
-
+    how="inner").drop(columns = ["iso3_o", "iso3_d"])
 
 df_jointure = df_jointure[df_jointure["region_origin"] == "Southern Asia"]
 
-print(df_jointure)
+print(df_jointure.columns)
