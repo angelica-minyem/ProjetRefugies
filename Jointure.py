@@ -16,3 +16,4 @@ df_jointure = pd.merge(df_unhcr,df_cepii,
 )
 
 print(df_jointure)
+
