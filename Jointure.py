@@ -15,5 +15,7 @@ df_jointure = pd.merge(df_unhcr,df_cepii,
     how="inner",
 )
 
-print(df_jointure)
 
+df_jointure = df_jointure[df_jointure["region_origin"] == "Southern Asia"]
+
+print(df_jointure)
