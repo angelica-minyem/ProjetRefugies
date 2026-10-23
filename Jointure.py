@@ -1,10 +1,10 @@
 import pandas as pd
 
-comparaison_url = "https://minio.lab.sspcloud.fr/dchitorog/cepii_clean.parquet"
-mixed_url = "https://minio.lab.sspcloud.fr/dchitorog/unhcr_clean.parquet"
+cepii_url = "https://minio.lab.sspcloud.fr/dchitorog/cepii_clean.parquet"
+unhcr_url = "https://minio.lab.sspcloud.fr/dchitorog/unhcr_clean.parquet"
 
-df_unhcr = pd.read_parquet(mixed_url)
-df_cepii = pd.read_parquet(comparaison_url)
+df_unhcr = pd.read_parquet(unhcr_url)
+df_cepii = pd.read_parquet(cepii_url)
 
 df_unhcr["year"] = df_unhcr["year"].astype(int)
 df_cepii["year"] = df_cepii["year"].astype(int)

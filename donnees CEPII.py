@@ -11,7 +11,7 @@ cols_utiles = ["year", "iso3_o", "iso3_d", "distw_harmonic", "contig", "comlang_
 
 
 
-comparaison = pd.read_csv(
+cepii_df = pd.read_csv(
     url, 
     usecols=cols_utiles,
     low_memory=False
@@ -19,13 +19,13 @@ comparaison = pd.read_csv(
 
 
 
-comparaison = comparaison[comparaison["year"] == 2017]
-comparaison=comparaison[comparaison["iso3_o"]!=comparaison["iso3_d"]]
+cepii_df = cepii_df[cepii_df["year"] == 2017]
+cepii_df=cepii_df[cepii_df["iso3_o"]!=cepii_df["iso3_d"]]
 
-comparaison['contig'] = comparaison['contig'].replace(0, False)
-comparaison['comlang_off'] = comparaison['comlang_off'].replace(0, False)
-comparaison['comcol'] = comparaison['comcol'].replace(0, False)
-comparaison['contig'] = comparaison['contig'].replace(1, True)
-comparaison['comlang_off'] = comparaison['comlang_off'].replace(1, True)
-comparaison['comcol'] = comparaison['comcol'].replace(1, True)
-print(comparaison)
+cepii_df['contig'] = cepii_df['contig'].replace(0, False)
+cepii_df['comlang_off'] = cepii_df['comlang_off'].replace(0, False)
+cepii_df['comcol'] = cepii_df['comcol'].replace(0, False)
+cepii_df['contig'] = cepii_df['contig'].replace(1, True)
+cepii_df['comlang_off'] = cepii_df['comlang_off'].replace(1, True)
+cepii_df['comcol'] = cepii_df['comcol'].replace(1, True)
+print(cepii_df)
