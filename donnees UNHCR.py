@@ -48,7 +48,8 @@ unhcr_df = refugees.merge(countries[["iso", "region"]].rename(columns = {"region
                         left_on="coo_iso", right_on="iso", how="left").merge(
                         countries[["iso", "region"]].rename(columns = {"region": "region_arrival"}),
                         left_on="coa_iso", right_on="iso", how="left", suffixes = ("_origin", "_arrival"))
-unhcr_df.to_parquet("unhcr_clean.parquet", index=False)
+print(unhcr_df)
+#unhcr_df.to_parquet("unhcr_clean.parquet", index=False)
 
 # Diagnostic macro sur les déplacements des réfugiés selon leur région d'origine
 # overview1:
