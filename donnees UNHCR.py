@@ -46,12 +46,10 @@ refugees["asylum_seekers"] = pd.to_numeric(refugees["asylum_seekers"])
 refugees["year"] = refugees["year"].astype(int)
 
 
-# Ajout des régions des pays d'origine et d'arrivée
+# Ajout des régions des pays d'origine des réfugiés
 
 unhcr_df = refugees.merge(countries[["iso", "region"]].rename(columns = {"region": "region_origin"}),
-                        left_on="coo_iso", right_on="iso", how="left").merge(
-                        countries[["iso", "region"]].rename(columns = {"region": "region_arrival"}),
-                        left_on="coa_iso", right_on="iso", how="left", suffixes = ("_origin", "_arrival"))
+                        left_on="coo_iso", right_on="iso", how="left").drop(columns = "iso")
 
 # Conversion du dataframe en fichier parquet
 
