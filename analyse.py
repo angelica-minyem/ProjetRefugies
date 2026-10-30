@@ -25,6 +25,26 @@ south_asia = pd.merge(df_unhcr, df_cepii,
 print(df_unhcr.shape)
 print(south_asia.shape)
 
+#Problème:les données du CEPII (et donc la jointure) contiennent des doublons. Les copies comportent un grand nombre de 
+#données manquantes. Afin de nettoyer le base de données, création de la variable na_count, qui contient le nombre de 
+#données manquantes dans chaque ligne:
+
+south_asia["na_count"] = south_asia.isna().sum(axis=1)
+
+#L'original sera alors la ligne contenant le moins de données manquantes. Tri des lignes par les colonnes "year", "coo_iso",
+# "coa_iso", puis par na_count. La ligne la plus complète sera alors positionnée en premier.
+
+south_asia = south_asia.sort_values(
+    by=["year", "coo_iso", "coa_iso", "na_count"]
+)
+
+#On retire alors les doublons incomplets.
+
+south_asia = south_asia.drop_duplicates(subset=["year", "coo_iso", "coa_iso"], keep='first')
+
+#On retire la colonne na_count, désormais inutile.
+
+south_asia = south_asia.drop(columns="na_count")
 
 # -------------------------------------------------------------------
 
