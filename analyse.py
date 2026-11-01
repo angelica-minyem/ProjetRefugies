@@ -1,5 +1,7 @@
 import pandas as pd
 
+# %%
+
 # Chargement des bases UNHCR et CEPII nettoyées depuis le stockage Onyxia
 cepii_url = "https://minio.lab.sspcloud.fr/angelik/ProjetRefugies/cepii_df.parquet"
 unhcr_url = "https://minio.lab.sspcloud.fr/angelik/ProjetRefugies/unhcr_df.parquet"
@@ -67,3 +69,68 @@ south_asia = south_asia.drop(columns="total_refugees_origin")
 # Sélection des variables nécessaires à l'analyse de la répartition
 # des réfugiés entre les différents pays de destination.
 refugee_destination_shares = south_asia[["year", "coo_name", "coa_name", "destination_share"]]
+
+
+
+###############################
+#CODE CARTE DANIEL
+import pandas as pd
+import geopandas as gpd
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.patches import FancyArrowPatch
+
+
+carte_url = "s3://dchitorog/Carte world/ne_110m_admin_0_countries.shp"
+
+#Chargement fond de carte mondial
+world = gpd.read_file(carte_url)
+world = world.to_crs(epsg=4326)
+world["iso_a3"] = world["ADM0_A3"].str.strip()
+
+# Calcul des centroïdes ( coordonnées latitude et longitude de chaque pays)
+centroids = world.geometry.centroid
+coords = pd.DataFrame({"iso" : world["iso_a3"], "lon" : centroids.x, "lat" : centroids.y,})
+
+# On crée les flux
+flux_map = south_asia[(south_asia["year"] == 2017) & (south_asia["refugees"] > 0)].copy()
+# Pour bien visualiser, on décide un minimum de 500 réfugiés
+flux_map = flux_map[flux_map["refugees"] >= 500].copy()
+
+# Jointure pour récupérer les coordonnées du pays d'origine (départ)
+flux_map = flux_map.merge(coords.rename(columns={"iso": "coo_iso", "lon": "orig_lon", "lat": "orig_lat"}),
+    on="coo_iso",
+    how="inner",)
+
+# Jointure pour récupérer les coordonnées du pays d'arrivée (destination)
+flux_map = flux_map.merge(coords.rename(columns={"iso": "coa_iso", "lon": "dest_lon", "lat": "dest_lat"}),
+    on="coa_iso",
+    how="inner",)
+
+# Tracé cartographique
+fig, ax = plt.subplots(figsize=(18, 9))
+
+# Fond de carte mondial
+world.plot(ax=ax, color="#EAEAEA", edgecolor="#B5B5B5", linewidth=0.5)
+
+# Mise en évidence de l'Asie du Sud (zone de départ étudiée)
+south_asia_isos = flux_map["coo_iso"].unique()
+world[world["iso_a3"].isin(south_asia_isos)].plot(ax=ax, color="#FDE0DD", edgecolor="#FA9FB5", linewidth=0.8)
+
+# Tracé des flèches orientées
+for x, row in flux_map.iterrows() :
+    width = 1 + row["refugees"] * 10 ** (-5)  #( 1 correspondant à l'épaisseur minimale)
+    arrow = FancyArrowPatch(posA=(row["orig_lon"], row["orig_lat"]),posB=(row["dest_lon"], row["dest_lat"]),
+        connectionstyle="arc3,rad=0.25",arrowstyle="-|>",mutation_scale=10,color="#C51B8A",alpha=0.7,linewidth=width)
+    ax.add_patch(arrow)
+
+
+# Cadrage et habillage
+ax.set_xlim(-180, 180)
+ax.set_ylim(-60, 85)
+ax.set_axis_off()
+ax.set_title("Principaux flux de réfugiés originaires d'Asie du Sud (2017)",fontsize=13,fontweight="bold",pad=15)
+
+plt.tight_layout()
+plt.show()
+# %%
