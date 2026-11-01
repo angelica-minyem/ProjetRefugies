@@ -90,7 +90,7 @@ world["iso_a3"] = world["ADM0_A3"].str.strip()
 
 # Calcul des centroïdes ( coordonnées latitude et longitude de chaque pays)
 centroids = world.geometry.centroid
-coords = pd.DataFrame({"iso" : world["iso_a3"], "lon" : centroids.x, "lat" : centroids.y,})
+coords = pd.DataFrame({"iso" : world["iso_a3"], "lon" : centroids.x, "lat" : centroids.y})
 
 # On crée les flux
 flux_map = south_asia[(south_asia["year"] == 2017) & (south_asia["refugees"] > 0)].copy()
@@ -100,12 +100,12 @@ flux_map = flux_map[flux_map["refugees"] >= 500].copy()
 # Jointure pour récupérer les coordonnées du pays d'origine (départ)
 flux_map = flux_map.merge(coords.rename(columns={"iso": "coo_iso", "lon": "orig_lon", "lat": "orig_lat"}),
     on="coo_iso",
-    how="inner",)
+    how="inner")
 
 # Jointure pour récupérer les coordonnées du pays d'arrivée (destination)
 flux_map = flux_map.merge(coords.rename(columns={"iso": "coa_iso", "lon": "dest_lon", "lat": "dest_lat"}),
     on="coa_iso",
-    how="inner",)
+    how="inner")
 
 # Tracé cartographique
 fig, ax = plt.subplots(figsize=(18, 9))
@@ -125,7 +125,7 @@ for x, row in flux_map.iterrows() :
     ax.add_patch(arrow)
 
 
-# Cadrage et habillage
+# Cadrage et titre
 ax.set_xlim(-180, 180)
 ax.set_ylim(-60, 85)
 ax.set_axis_off()
