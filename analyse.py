@@ -1,6 +1,8 @@
 
 # %%
+
 import pandas as pd
+
 # Chargement des bases UNHCR et CEPII nettoyées depuis le stockage Onyxia
 cepii_url = "https://minio.lab.sspcloud.fr/angelik/ProjetRefugies/cepii_df.parquet"
 unhcr_url = "https://minio.lab.sspcloud.fr/angelik/ProjetRefugies/unhcr_df.parquet"
