@@ -41,13 +41,14 @@ south_asia = south_asia.sort_values(
     by=["year", "coo_iso", "coa_iso", "na_count"]
 )
 
-#On retire alors les doublons incomplets.
+# On retire alors les doublons incomplets.
 
 south_asia = south_asia.drop_duplicates(subset=["year", "coo_iso", "coa_iso"], keep='first')
 
-#On retire la colonne na_count, désormais inutile.
+# On retire la colonne na_count, désormais inutile.
 
 south_asia = south_asia.drop(columns="na_count")
+
 # -------------------------------------------------------------------
 
 # Nombre total de réfugiés par pays d'origine et par année,
@@ -65,11 +66,14 @@ south_asia["destination_share"] = south_asia["refugees"]/south_asia["total_refug
 
 # Suppression de la variable intermédiaire devenue inutile.
 south_asia = south_asia.drop(columns="total_refugees_origin")
+# Sélection des variables nécessaires à l'analyse de la répartition
 
 # Sélection des variables nécessaires à l'analyse de la répartition
 # des réfugiés entre les différents pays de destination.
-refugee_destination_shares = south_asia[["year", "coo_name", "coa_name", "destination_share"]]
+destination_shares = south_asia[["year", "coo_name", "coa_name", "destination_share"]]
 
+# Conversion du dataframe obtenu en format parquet
+destination_shares.to_parquet("destination_shares.parquet", index=False)
 
 ###############################
 #Etude lien richesse immigration
