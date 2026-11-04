@@ -31,8 +31,6 @@ import matplotlib.pyplot as plt
 destination_shares = pd.read_parquet(
     "https://minio.lab.sspcloud.fr/angelik/ProjetRefugies/destination_shares.parquet")
 
-import matplotlib.pyplot as plt
-
 
 def plot_destinations(country):
 
