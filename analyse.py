@@ -1,6 +1,3 @@
-
-# %%
-
 import pandas as pd
 
 # Chargement des bases UNHCR et CEPII nettoyées depuis le stockage Onyxia
@@ -76,6 +73,7 @@ destination_shares = south_asia[["year", "coo_name", "coa_name", "destination_sh
 destination_shares.to_parquet("destination_shares.parquet", index=False)
 
 print(south_asia)
+
 ###############################
 #Etude lien richesse immigration
 #On calcule pour chaque pays le nombre total de réfugiés en provenance de la région étudiée arrivant dans ce pays. 
@@ -169,4 +167,4 @@ analysis_by_country("PAK")
 
 # plt.tight_layout()
 # plt.show()
-# %%
+

@@ -18,13 +18,13 @@ unhcr_df = pd.read_parquet("https://minio.lab.sspcloud.fr/angelik/ProjetRefugies
 # On conserve uniquement les couples origine-destination pour lesquels
 # au moins un demandeur d'asile est recensé.
 
-unhcr_df = unhcr_df[unhcr_df["asylum_seekers"] > 0]
+unhcr_df = unhcr_df[unhcr_df["refugees"] > 0]
 
 # Nombre total de demandeurs d'asile par région d'origine,
 # classé par ordre décroissant.
 
-overview1 = (unhcr_df.groupby("region_origin")["asylum_seekers"]
-            .sum().reset_index().sort_values(axis=0, by="asylum_seekers", ascending=False))
+overview1 = (unhcr_df.groupby("region_origin")["refugees"]
+            .sum().reset_index().sort_values(axis=0, by="refugees", ascending=False))
 
 # Nombre de pays de destination distincts pour chaque pays d'origine
 # et chaque année.
