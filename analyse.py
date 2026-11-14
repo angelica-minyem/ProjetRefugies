@@ -1,5 +1,8 @@
-import pandas as pd
 
+# %%
+
+import pandas as pd
+import matplotlib.pyplot as plt
 # Chargement des bases UNHCR et CEPII nettoyées depuis le stockage Onyxia
 cepii_url = "https://minio.lab.sspcloud.fr/angelik/ProjetRefugies/cepii_df.parquet"
 unhcr_url = "https://minio.lab.sspcloud.fr/angelik/ProjetRefugies/unhcr_df.parquet"
@@ -32,17 +35,16 @@ print(south_asia.shape)
 south_asia["na_count"] = south_asia.isna().sum(axis=1)
 
 #L'original sera alors la ligne contenant le moins de données manquantes. Tri des lignes par les colonnes "year", "coo_iso",
-# "coa_iso", puis par na_count. La ligne la plus complète sera alors positionnée en premier.
+# "coa_iso", puis par na_count. La ligne la plus complète sera alors positionnée en premier, permettant d'identifier et de supprimer les doublons.
 
 south_asia = south_asia.sort_values(
     by=["year", "coo_iso", "coa_iso", "na_count"]
 )
 
-# On retire alors les doublons incomplets.
+
 
 south_asia = south_asia.drop_duplicates(subset=["year", "coo_iso", "coa_iso"], keep='first')
 
-# On retire la colonne na_count, désormais inutile.
 
 south_asia = south_asia.drop(columns="na_count")
 
@@ -63,7 +65,6 @@ south_asia["destination_share"] = south_asia["refugees"]/south_asia["total_refug
 
 # Suppression de la variable intermédiaire devenue inutile.
 south_asia = south_asia.drop(columns="total_refugees_origin")
-# Sélection des variables nécessaires à l'analyse de la répartition
 
 # Sélection des variables nécessaires à l'analyse de la répartition
 # des réfugiés entre les différents pays de destination.
@@ -72,15 +73,12 @@ destination_shares = south_asia[["year", "coo_name", "coa_name", "destination_sh
 # Conversion du dataframe obtenu en format parquet
 destination_shares.to_parquet("destination_shares.parquet", index=False)
 
-print(south_asia)
-
 ###############################
 #Etude lien richesse immigration
 #On calcule pour chaque pays le nombre total de réfugiés en provenance de la région étudiée arrivant dans ce pays. 
 # On met cette information dans la table data accompagnée du PIB du pays d'arrivée, dans le but de faire un graphique reliant les deux. 
 data = south_asia.groupby(["coa_iso"]).agg(refugees_sum=pd.NamedAgg(column="refugees", aggfunc="sum"), gdp=pd.NamedAgg(column="gdpcap_d", aggfunc="max"))
 #On représente le nombre de réfugiés provenant de la région étudiée par rapport au PIB de la destination.
-import matplotlib.pyplot as plt
 
 # plt.figure(figsize=(10, 6))
 # graph=plt.scatter(data["gdp"],data["refugees_sum"])
@@ -104,14 +102,47 @@ def analysis_by_country(country):
     plt.show()
 
 
-analysis_by_country("PAK")
+###############################
+#Etude frontière
+#On calcule le pourcentage de demandes d'asiles réalisées dans un pays frontalier, par pays d'origine et par année
+# frontiere_data = south_asia[["year", "coo_name", "coa_name", "destination_share","contig"]]
+# frontiere_comm = frontiere_data.loc[frontiere_data["contig"]==True]
+# frontiere_part = frontiere_comm.groupby(["year","coo_name"])["destination_share"].sum()
+# #Graphique:
+# import matplotlib.pyplot as plt
+
+# plt.figure(figsize=(15, 6))
+
+# frontiere_part.plot(kind="bar")
+
+# plt.xlabel("Pays et année")
+# plt.ylabel("Pourcentage de demandes d'asile réalisées dans un pays connexe")
+# plt.title("Pourcentage de demandes d'asile réalisées dans un pays connexe par pays et année")
+
+# plt.show()
 
 ###############################
-# #CODE CARTE DANIEL
-import pandas as pd
-import geopandas as gpd
+#Etude langue
+#On calcule le pourcentage de demandes d'asiles réalisées dans un pays partageant une langue officielle, par pays d'origine et par année
+frontiere_data = south_asia[["year", "coo_name", "coa_name", "destination_share","comlang_off"]]
+frontiere_comm = frontiere_data.loc[frontiere_data["comlang_off"]==True]
+frontiere_part = frontiere_comm.groupby(["year","coo_name"])["destination_share"].sum()
+#Graphique:
 import matplotlib.pyplot as plt
-import numpy as np
+
+plt.figure(figsize=(15, 6))
+
+frontiere_part.plot(kind="bar")
+
+plt.xlabel("Pays et année")
+plt.ylabel("Pourcentage de demandes d'asile réalisées dans un pays partageant une langue officielle")
+plt.title("Pourcentage de demandes d'asile réalisées dans un pays partageant une langue officielle par pays et année")
+
+plt.show()
+# %%
+###############################
+# #CODE CARTE DANIEL
+import geopandas as gpd
 from matplotlib.lines import Line2D
 from matplotlib.patches import FancyArrowPatch
 
