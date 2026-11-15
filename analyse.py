@@ -252,3 +252,32 @@ plt.ylabel("Part des demandes d'asile choisissant la destination")
 plt.title("Régression linéaire simple : choix de destination selon la distance")
 plt.legend()
 plt.show()
+
+# Lien pas assez visible, passage en log
+
+# Transformation logarithmique des deux variables
+dist_df["log_dist"] = np.log(dist_df["distw_harmonic"])
+dist_df["log_share"] = np.log(dist_df["destination_share"])
+
+# Régression linéaire modèle log-log
+x_log = dist_df[["log_dist"]]
+y_log = dist_df["log_share"]
+
+reg_log = LinearRegression()
+reg_log.fit(x_log, y_log)
+
+print("Modèle log-log - Constante :", reg_log.intercept_)
+print("Modèle log-log - Pente (élasticité) :", reg_log.coef_[0])
+print("Modèle log-log - R² :", reg_log.score(x_log, y_log))
+
+# Graphique : nuage de point et droite de régression log-log
+
+plt.figure(figsize=(10, 6))
+plt.scatter(dist_df["log_dist"], y_log, alpha=0.5, label="Observations (log)")
+plt.plot(dist_df["log_dist"], reg_log.predict(x_log), color="red", linewidth=2, label="Régression log-log")
+plt.xlabel("Logarithme de la distance : ln(distw_harmonic)")
+plt.ylabel("Logarithme de la part de destination : ln(destination_share)")
+plt.title("Modèle log-log : choix de destination selon la distance")
+plt.legend()
+plt.show()
+# %%
