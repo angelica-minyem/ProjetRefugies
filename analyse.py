@@ -174,81 +174,82 @@ plt.show()
 # %%
 ###############################
 # #CODE CARTE DANIEL
-# import geopandas as gpd
-# from matplotlib.lines import Line2D
-# from matplotlib.patches import FancyArrowPatch
+import geopandas as gpd
+from matplotlib.lines import Line2D
+from matplotlib.patches import FancyArrowPatch
 
+carte_url = "s3://dchitorog/Carte world/ne_110m_admin_0_countries.shp"
 
-# carte_url = "s3://dchitorog/Carte world/ne_110m_admin_0_countries.shp"
+#Chargement fond de carte mondial
+world = gpd.read_file(carte_url)
+world = world.to_crs(epsg=4326)
+world["iso_a3"] = world["ADM0_A3"].str.strip()
 
-# #Chargement fond de carte mondial
-# world = gpd.read_file(carte_url)
-# world = world.to_crs(epsg=4326)
-# world["iso_a3"] = world["ADM0_A3"].str.strip()
+# Calcul des centroïdes ( coordonnées latitude et longitude de chaque pays)
+centroids = world.geometry.centroid
+coords = pd.DataFrame({"iso" : world["iso_a3"], "lon" : centroids.x, "lat" : centroids.y})
 
-# # Calcul des centroïdes ( coordonnées latitude et longitude de chaque pays)
-# centroids = world.geometry.centroid
-# coords = pd.DataFrame({"iso" : world["iso_a3"], "lon" : centroids.x, "lat" : centroids.y})
+# On regroupe les flux sur les 4 années pour chaque pays
+flux_map = south_asia.groupby(["coo_iso", "coo_name", "coa_iso", "coa_name"], as_index=False)["refugees"].sum()
+# On crée les flux, Pour bien visualiser, on décide un minimum de 5000 réfugiés
+flux_map = flux_map[flux_map["refugees"] >= 5000].sort_values(by="refugees", ascending=False).copy()
 
-# # On crée les flux, Pour bien visualiser, on décide un minimum de 500 réfugiés
-# flux_map = south_asia[(south_asia["year"] == 2017) & (south_asia["refugees"] >= 500)].copy()
+# Jointure pour récupérer les coordonnées du pays d'origine (départ)
+flux_map = flux_map.merge(coords.rename(columns={"iso": "coo_iso", "lon": "orig_lon", "lat": "orig_lat"}),
+    on="coo_iso",
+    how="inner")
 
+# Jointure pour récupérer les coordonnées du pays d'arrivée (destination)
+flux_map = flux_map.merge(coords.rename(columns={"iso": "coa_iso", "lon": "dest_lon", "lat": "dest_lat"}),
+    on="coa_iso",
+    how="inner")
 
-# # Jointure pour récupérer les coordonnées du pays d'origine (départ)
-# flux_map = flux_map.merge(coords.rename(columns={"iso": "coo_iso", "lon": "orig_lon", "lat": "orig_lat"}),
-#     on="coo_iso",
-#     how="inner")
+# Palette de couleurs par pays d'origine
+origins = sorted(flux_map["coo_name"].unique())
+palette = plt.cm.tab10(np.linspace(0, 1, len(origins)))
+color_dict = {orig: palette[i] for i, orig in enumerate(origins)}
 
-# # Jointure pour récupérer les coordonnées du pays d'arrivée (destination)
-# flux_map = flux_map.merge(coords.rename(columns={"iso": "coa_iso", "lon": "dest_lon", "lat": "dest_lat"}),
-#     on="coa_iso",
-#     how="inner")
+# Tracé cartographique
+fig, ax = plt.subplots(figsize=(18, 9))
 
-# # Palette de couleurs par pays d'origine
-# origins = sorted(flux_map["coo_name"].unique())
-# palette = plt.cm.tab10(np.linspace(0, 1, len(origins)))
-# color_dict = {orig: palette[i] for i, orig in enumerate(origins)}
+# Fond de carte mondial
+world.plot(ax=ax, color="#EAEAEA", edgecolor="#B5B5B5", linewidth=0.5)
 
-# # Tracé cartographique
-# fig, ax = plt.subplots(figsize=(18, 9))
+# Mise en évidence de l'Asie du Sud (zone de départ étudiée)
+south_asia_isos = flux_map["coo_iso"].unique()
+world[world["iso_a3"].isin(south_asia_isos)].plot(ax=ax, color="#FDE0DD", edgecolor="#FA9FB5", linewidth=0.8)
 
-# # Fond de carte mondial
-# world.plot(ax=ax, color="#EAEAEA", edgecolor="#B5B5B5", linewidth=0.5)
+# Tracé des flèches orientées
+for x, row in flux_map.iterrows() :
+    width = 0.5 + row["refugees"] *2*10 ** (-5)  #( 1 correspondant à l'épaisseur minimale, le facteur 2*10**(-5) pour un meilleur visuel)
+    c = color_dict[row["coo_name"]]
+    arrow = FancyArrowPatch(posA=(row["orig_lon"], row["orig_lat"]),posB=(row["dest_lon"], row["dest_lat"]),
+        connectionstyle="arc3,rad=0.25",arrowstyle="-|>",mutation_scale=10,color=c,alpha=0.7,linewidth=width)
+    ax.add_patch(arrow)
 
-# # Mise en évidence de l'Asie du Sud (zone de départ étudiée)
-# south_asia_isos = flux_map["coo_iso"].unique()
-# world[world["iso_a3"].isin(south_asia_isos)].plot(ax=ax, color="#FDE0DD", edgecolor="#FA9FB5", linewidth=0.8)
+# Légende pays d'origine
+legend_origins = [Line2D([0], [0], color=color_dict[orig], lw=2.5, marker=">", markersize=6, label=orig)for orig in origins]
+leg_origins = ax.legend(handles=legend_origins,title="Pays d'origine",loc="lower left",frameon=True,facecolor="white",
+    framealpha=0.9,edgecolor="#CCCCCC",fontsize=9,title_fontsize=10)
+ax.add_artist(leg_origins)
 
-# # Tracé des flèches orientées
-# for x, row in flux_map.iterrows() :
-#     width = 1 + row["refugees"] * 10 ** (-5)  #( 1 correspondant à l'épaisseur minimale, le facteur 10**(-5) pour un meilleur visuel)
-#     c = color_dict[row["coo_name"]]
-#     arrow = FancyArrowPatch(posA=(row["orig_lon"], row["orig_lat"]),posB=(row["dest_lon"], row["dest_lat"]),
-#         connectionstyle="arc3,rad=0.25",arrowstyle="-|>",mutation_scale=10,color=c,alpha=0.7,linewidth=width)
-#     ax.add_patch(arrow)
+# Légende 2 : Échelle des volumes
+paliers = [5000, 50000, 200000]
+paliers = [p for p in paliers if p <= flux_map["refugees"].max() * 1.2]
 
-# # Légende pays d'origine
-# legend_origins = [Line2D([0], [0], color=color_dict[orig], lw=2.5, marker=">", markersize=6, label=orig)for orig in origins]
-# leg_origins = ax.legend(handles=legend_origins,title="Pays d'origine",loc="lower left",frameon=True,facecolor="white",
-#     framealpha=0.9,edgecolor="#CCCCCC",fontsize=9,title_fontsize=10)
-# ax.add_artist(leg_origins)
+legend_scale = [Line2D([0], [0], color="#555555", lw= 0.5 + val * 2 * 10 ** (-5), label=f"{val:,.0f} réfugiés".replace(",", " "))for val in paliers]
+ax.legend(handles=legend_scale,title="Volume du flux",loc="lower right",frameon=True,facecolor="white",
+    framealpha=0.9,edgecolor="#CCCCCC",fontsize=9,title_fontsize=10)
 
-# # Légende 2 : Échelle des volumes
-# paliers = [5000, 50000, 200000]
-# paliers = [p for p in paliers if p <= flux_map["refugees"].max() * 1.2]
+# Cadrage et titre
+ax.set_xlim(-180, 180)
+ax.set_ylim(-60, 85)
+ax.set_axis_off()
+ax.set_title("Principaux flux de réfugiés originaires d'Asie du Sud (2017-2020)",fontsize=13,fontweight="bold",pad=15)
 
-# legend_scale = [Line2D([0], [0], color="#555555", lw=1 + val * 10 ** (-5), label=f"{val:,.0f} réfugiés".replace(",", " "))for val in paliers]
-# ax.legend(handles=legend_scale,title="Volume du flux",loc="lower right",frameon=True,facecolor="white",
-#     framealpha=0.9,edgecolor="#CCCCCC",fontsize=9,title_fontsize=10)
+plt.tight_layout()
+plt.show()
 
-# # Cadrage et titre
-# ax.set_xlim(-180, 180)
-# ax.set_ylim(-60, 85)
-# ax.set_axis_off()
-# ax.set_title("Principaux flux de réfugiés originaires d'Asie du Sud (2017)",fontsize=13,fontweight="bold",pad=15)
-
-# plt.tight_layout()
-# plt.show()
 # %%
 
 ###############################
