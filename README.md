@@ -26,5 +26,5 @@ Le rapport suit une progression en trois étapes :
 2. **Exploration et cartographie de l'Asie du Sud** : carte mondiale des principaux flux cumulés (2017–2020, seuil $\ge 5\,000$ demandes) avec GeoPandas, profil des 9 pays de la région et répartition annuelle du top 5 des destinations.
 3. **Analyse des déterminants** :
    - **Richesse du pays d'accueil ('gdpcap_d')** : nuages de points et régression log-log.
-   - **Distance géographique ('distw_harmonic')** : régression linéaire simple puis modèle log-log ('scikit-learn'), mise en perspective du faible $R^2$ avec la littérature économique (spécificité 'ASY' vs réfugiés de masse).
+   - **Distance géographique ('distw_harmonic')** : régression linéaire simple puis modèle log-log ('scikit-learn'), mise en perspective du faible $R^2$ avec la littérature (spécificité 'ASY' vs réfugiés de masse).
    - **Facteurs culturels et frontaliers** : part des demandes dirigées vers un pays partageant une langue officielle ('comlang_off'), une frontière ('contig') ou des liens historiques/religieux ('col_dep_ever', 'comrelig').
