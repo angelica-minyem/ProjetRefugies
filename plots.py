@@ -2,75 +2,80 @@
 
 import pandas as pd
 import plotly.express as px
+import geopandas as gpd
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.lines import Line2D
+from matplotlib.patches import FancyArrowPatch
+from sklearn.linear_model import LinearRegression
 
 from analyse_preliminaire import create_overview, create_overview_south_asia
 
-unhcr_url = "https://minio.lab.sspcloud.fr/angelik/ProjetRefugies/unhcr_df.parquet"
-unhcr_df = pd.read_parquet(unhcr_url)
 
-# %%
+def affichage_scatter_plot():
+    unhcr_url = "https://minio.lab.sspcloud.fr/angelik/ProjetRefugies/unhcr_df.parquet"
+    unhcr_df = pd.read_parquet(unhcr_url)
 
-# Affichage du scatter plot à partir du tableau "overview"
-# construit dans analyse_preliminaire.
-# Le graphique compare les régions d'origine selon le volume total
-# de demandes d'asile et le nombre moyen de pays de destination.
+    # %%
 
-overview = create_overview(unhcr_df)
+    # Affichage du scatter plot à partir du tableau "overview"
+    # construit dans analyse_preliminaire.
+    # Le graphique compare les régions d'origine selon le volume total
+    # de demandes d'asile et le nombre moyen de pays de destination.
 
-fig = px.scatter(
-    overview,
-    x="mean_destination_countries",
-    y="refugees",
-    hover_name="region_origin",
-    hover_data={
-        "mean_destination_countries": ":.1f",
-        "refugees": ":,"
-    },
-    labels={
-        "mean_destination_countries": "Nombre moyen de pays de destination",
-        "refugees": "Nombre total de demandes d'asile"
-    }
-)
+    overview = create_overview(unhcr_df)
 
-fig.update_layout(
-    title="Demandes d'asile et diversité des destinations par région d'origine"
-)
+    fig = px.scatter(
+        overview,
+        x="mean_destination_countries",
+        y="refugees",
+        hover_name="region_origin",
+        hover_data={
+            "mean_destination_countries": ":.1f",
+            "refugees": ":,"
+        },
+        labels={
+            "mean_destination_countries": "Nombre moyen de pays de destination",
+            "refugees": "Nombre total de demandes d'asile"
+        }
+    )
 
-fig.show()
+    fig.update_layout(
+        title="Demandes d'asile et diversité des destinations par région d'origine"
+    )
 
-# %%
+    fig.show()
 
-# Affichage du scatter plot à partir du tableau "overview_south_asia"
-# construit dans analyse_preliminaire.
-# Le graphique compare les pays d'Asie du Sud selon le volume total
-# de demandes d'asile et le nombre moyen de pays de destination.
+    # %%
 
-overview_south_asia = create_overview_south_asia(unhcr_df)
+    # Affichage du scatter plot à partir du tableau "overview_south_asia"
+    # construit dans analyse_preliminaire.
+    # Le graphique compare les pays d'Asie du Sud selon le volume total
+    # de demandes d'asile et le nombre moyen de pays de destination.
 
-fig = px.scatter(
-    overview_south_asia,
-    x="mean_destination_countries",
-    y="refugees",
-    hover_name="coo_name",
-    hover_data={
-        "mean_destination_countries": ":.1f",
-        "refugees": ":,"
-    },
-    labels={
-        "mean_destination_countries": "Nombre moyen de pays de destination",
-        "refugees": "Nombre total de demandes d'asile"
-    }
-)
+    overview_south_asia = create_overview_south_asia(unhcr_df)
 
-fig.update_layout(
-    title="Demandes d'asile et diversité des destinations par pays d'origine en Asie du Sud"
-)
+    fig = px.scatter(
+        overview_south_asia,
+        x="mean_destination_countries",
+        y="refugees",
+        hover_name="coo_name",
+        hover_data={
+            "mean_destination_countries": ":.1f",
+            "refugees": ":,"
+        },
+        labels={
+            "mean_destination_countries": "Nombre moyen de pays de destination",
+            "refugees": "Nombre total de demandes d'asile"
+        }
+    )
 
-fig.show()
+    fig.update_layout(
+        title="Demandes d'asile et diversité des destinations par pays d'origine en Asie du Sud"
+    )
 
-# %%
+    fig.show()
 
-import matplotlib.pyplot as plt
 
 destination_shares = pd.read_parquet(
     "https://minio.lab.sspcloud.fr/angelik/ProjetRefugies/destination_shares.parquet"
@@ -120,18 +125,13 @@ def plot_destinations(country):
     plt.tight_layout()
     plt.show()
 
-countries = overview_south_asia["coo_name"].unique()
-for country in countries :
-    plot_destinations(country)
+def affichage_country() :
+    countries = overview_south_asia["coo_name"].unique()
+    for country in countries :
+        plot_destinations(country)
 # %%
 
-import geopandas as gpd
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-from matplotlib.lines import Line2D
-from matplotlib.patches import FancyArrowPatch
-from sklearn.linear_model import LinearRegression
+
 
 
 def plot_carte_flux(south_asia,carte_url="s3://dchitorog/Carte world/ne_110m_admin_0_countries.shp",seuil=5000,):
