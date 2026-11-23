@@ -53,7 +53,6 @@ def charger_south_asia():
     south_asia = south_asia.drop(columns="na_count")
     return south_asia
 
-south_asia = charger_south_asia()
 
 # -------------------------------------------------------------------
 
