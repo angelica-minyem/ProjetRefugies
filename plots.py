@@ -1,5 +1,3 @@
-# %%
-
 import pandas as pd
 import plotly.express as px
 import geopandas as gpd
@@ -12,17 +10,17 @@ from sklearn.linear_model import LinearRegression
 from analyse_preliminaire import create_overview, create_overview_south_asia
 
 
-def affichage_scatter_plot():
+def world_scatter_plot():
+    """""
+    Affichage du scatter plot à partir du tableau "overview" 
+    construit dans analyse preliminaire
+    Le graphique compare les régions du monde selon le volume total
+    de demandes d'asile et le nombre moyen de pays de destination
+
+    """
+
     unhcr_url = "https://minio.lab.sspcloud.fr/angelik/ProjetRefugies/unhcr_df.parquet"
     unhcr_df = pd.read_parquet(unhcr_url)
-
-    # %%
-
-    # Affichage du scatter plot à partir du tableau "overview"
-    # construit dans analyse_preliminaire.
-    # Le graphique compare les régions d'origine selon le volume total
-    # de demandes d'asile et le nombre moyen de pays de destination.
-
     overview = create_overview(unhcr_df)
 
     fig = px.scatter(
@@ -46,13 +44,17 @@ def affichage_scatter_plot():
 
     fig.show()
 
-    # %%
+def south_asia_scatter_plot():
+    """
+    Affichage du scatter plot à partir du tableau "overview_south_asia" 
+    construit dans analyse preliminaire
+    Le graphique compare les pays d'Asie du Sud selon le volume total
+    de demandes d'asile et le nombre moyen de pays de destination
 
-    # Affichage du scatter plot à partir du tableau "overview_south_asia"
-    # construit dans analyse_preliminaire.
-    # Le graphique compare les pays d'Asie du Sud selon le volume total
-    # de demandes d'asile et le nombre moyen de pays de destination.
+    """ 
 
+    unhcr_url = "https://minio.lab.sspcloud.fr/angelik/ProjetRefugies/unhcr_df.parquet"
+    unhcr_df = pd.read_parquet(unhcr_url)
     overview_south_asia = create_overview_south_asia(unhcr_df)
 
     fig = px.scatter(
@@ -77,17 +79,14 @@ def affichage_scatter_plot():
     fig.show()
 
 
-destination_shares = pd.read_parquet(
-    "https://minio.lab.sspcloud.fr/angelik/ProjetRefugies/destination_shares.parquet"
-)
-
-# Affichage, pour un pays d'origine donné, des cinq principales
-# destinations et de la part restante pour chaque année entre 2017 et 2020.
-
 def plot_destinations(country):
 
+    """
+    Affichage, pour un pays d'origine donné, des cinq principales
+    destinations et de la part restante pour chaque année entre 2017 et 2020.
+    """
+    destination_shares = pd.read_parquet("https://minio.lab.sspcloud.fr/angelik/ProjetRefugies/destination_shares.parquet")
     fig, axes = plt.subplots(2, 2, figsize=(12, 10))
-
     years = [2017, 2018, 2019, 2020]
 
     for year, ax in zip(years, axes.flatten()):
@@ -125,13 +124,11 @@ def plot_destinations(country):
     plt.tight_layout()
     plt.show()
 
+
 def affichage_country() :
     countries = overview_south_asia["coo_name"].unique()
     for country in countries :
         plot_destinations(country)
-# %%
-
-
 
 
 def plot_carte_flux(south_asia,carte_url="s3://dchitorog/Carte world/ne_110m_admin_0_countries.shp",seuil=5000,):

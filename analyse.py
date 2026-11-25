@@ -27,11 +27,6 @@ def charger_south_asia():
                 right_on=["year", "iso3_o", "iso3_d"],
                 how="inner").drop(columns=["iso3_o", "iso3_d"])
 
-    # Vérification du nombre d'observations avant et après la jointure : pb la jointure rajoute des lignes :(
-
-    print(df_unhcr.shape)
-    print(south_asia.shape)
-
     #Problème:les données du CEPII (et donc la jointure) contiennent des doublons. Les copies comportent un grand nombre de 
     #données manquantes. Afin de nettoyer le base de données, création de la variable na_count, qui contient le nombre de 
     #données manquantes dans chaque ligne:
@@ -69,7 +64,51 @@ def charger_south_asia():
     south_asia = south_asia.drop(columns="total_refugees_origin")
     return south_asia
 
-# -------------------------------------------------------------------
+# Analyse du facteur lien colonial
+# Calcul du nombre de pairs pays d'Asie du Sud/pays de destination des réfugiés concernés
+
+
+
+def colonial_past():
+
+    south_asia = charger_south_asia()
+
+    colonial_past = south_asia[south_asia["col_dep_ever"] == True].drop(columns = "col_dep_ever")
+
+    UK_average_share = colonial_past.groupby(["coo_name", "coa_name"])[
+                            "destination_share"].mean().reset_index().rename(columns= 
+                            {"destination_share": "mean_share_UK"})
+
+    coo_names = colonial_past["coo_name"].unique()
+
+    south_asia_others = south_asia[south_asia["coo_name"].isin(coo_names)]
+    south_asia_others = south_asia_others[south_asia_others["coa_name"]!= "United Kingdom"
+                                     ].drop(columns = "col_dep_ever")
+                        
+    others_average_share = south_asia_others.groupby("coo_name")[
+                       "destination_share"].mean().reset_index().rename(columns= 
+                       {"destination_share": "mean_share_others"})
+
+    colonial_past_wide = colonial_past.pivot_table(
+                        index=["coo_name", "coa_name"],
+                        columns="year",
+                        values="destination_share").reset_index()
+
+    colonial_past_wide = colonial_past_wide.rename(columns={
+                        2017: "destination_share_2017",
+                        2018: "destination_share_2018",
+                        2019: "destination_share_2019",
+                        2020: "destination_share_2020"})
+
+    colonial_past_wide = colonial_past_wide.merge(UK_average_share,
+                        on=["coo_name", "coa_name"]).merge(others_average_share,
+                        on="coo_name")
+
+    colonial_past_wide["ratio"] = (colonial_past_wide["mean_share_UK"]/colonial_past_wide["mean_share_others"]).round(2)
+
+    return colonial_past_wide
+
+
 def charger_destination_shares(south_asia):
     # Nombre total de réfugiés par pays d'origine et par année,
     # toutes destinations confondues.
@@ -87,6 +126,8 @@ def charger_destination_shares(south_asia):
     # Suppression de la variable intermédiaire devenue inutile.
     south_asia = south_asia.drop(columns="total_refugees_origin")
     return(south_asia)
+
+
     # Sélection des variables nécessaires à l'analyse de la répartition
     # des réfugiés entre les différents pays de destination.
     #destination_shares = south_asia[["year", "coo_name", "coa_name", "destination_share"]]
