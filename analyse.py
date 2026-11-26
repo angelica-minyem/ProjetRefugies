@@ -199,7 +199,7 @@ def reg_lin_log_log(south_asia):
 
 
 #Cette fonction prend en argument un id de pays appartenant à la région étudiée et trace le nombre de réfugiés provenant de ce pays par rapport au PIB de la destination.
-def analysis_by_country(country):
+def analysis_by_country(south_asia,country):
     df_country = south_asia.loc[(south_asia["coo_iso"]==country)]
     data_country = df_country.groupby(["coa_iso"]).agg(refugees_sum=pd.NamedAgg(column="refugees", aggfunc="sum"), gdp=pd.NamedAgg(column="gdpcap_d", aggfunc="max"))
     plt.figure(figsize=(10, 6))
