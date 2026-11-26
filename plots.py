@@ -125,13 +125,13 @@ def plot_destinations(country):
     plt.show()
 
 
-def affichage_country() :
+def affichage_country(overview_south_asia) :
     countries = overview_south_asia["coo_name"].unique()
     for country in countries :
         plot_destinations(country)
 
 
-def plot_carte_flux(south_asia,carte_url="s3://dchitorog/Carte world/ne_110m_admin_0_countries.shp",seuil=5000,):
+def plot_carte_flux(south_asia,carte_url="https://minio.lab.sspcloud.fr/dchitorog/Carte%20world/ne_110m_admin_0_countries.shp",seuil=5000,):
     """
     Affiche la carte mondiale des principaux flux cumulés (2017-2020)
     de demandeurs d'asile originaires d'Asie du Sud.
