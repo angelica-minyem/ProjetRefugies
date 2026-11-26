@@ -145,7 +145,7 @@ def scatter_plot_pib_demandes_asile(south_asia):
     #On représente le nombre de réfugiés provenant de la région étudiée par rapport au PIB/hab de la destination.
     plt.figure(figsize=(10, 6))
     graph=plt.scatter(data["gdp"],data["refugees_sum"])
-    plt.xlabel("PIB par habitant du pays destinataire")
+    plt.xlabel("PIB par habitant du pays destinataire (milliers de US$/hab)")
     plt.ylabel("Nombre de demandes d'asile provenant de la région Asie du sud")
     plt.title("Relation entre PIB et intensité des flux migratoires")
     plt.show()
@@ -157,7 +157,9 @@ def scatter_plot_ech_log(south_asia):
     #On représente le nombre de réfugiés provenant de la région étudiée par rapport au PIB/hab de la destination.
     plt.figure(figsize=(10, 6))
     graph=plt.scatter(data["gdp"],data["refugees_sum"])
-    plt.xlabel("PIB par habitant du pays destinataire")
+    plt.xscale("log")
+    plt.yscale("log")
+    plt.xlabel("PIB par habitant du pays destinataire (milliers de US$/hab)")
     plt.ylabel("Nombre de demandes d'asile provenant de la région Asie du sud")
     plt.title("Relation entre PIB et intensité des flux migratoires")
     plt.show()
@@ -184,7 +186,7 @@ def reg_lin_log_log(south_asia):
     plt.figure(figsize=(10, 6))
     plt.scatter(x, y, alpha=0.5, label="Observations")
     plt.plot(x, reg_log.predict(x), color="red", linewidth=2, label="Régression linéaire")
-    plt.xlabel("PIB par habitant du pays destinataire")
+    plt.xlabel("PIB par habitant du pays destinataire (milliers de US$/hab)")
     plt.ylabel("Nombre de demandes d'asile provenant de la région Asie du sud")
     plt.title("Régression linéaire log-log :nombre de demandes d'asile en provenance de l'asie du sud est en fonction du PIB/hab de la destination.")
     plt.legend()
