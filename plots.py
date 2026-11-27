@@ -12,7 +12,7 @@ from analyse_preliminaire import create_overview, create_overview_south_asia
 def world_scatter_plot():
     """
     Affichage du scatter plot à partir du tableau "overview" 
-    construit dans analyse preliminaire
+    construit dans analyse préliminaire
     Le graphique compare les régions du monde selon le volume total
     de demandes d'asile et le nombre moyen de pays de destination
 
@@ -46,7 +46,7 @@ def world_scatter_plot():
 def south_asia_scatter_plot():
     """
     Affichage du scatter plot à partir du tableau "overview_south_asia" 
-    construit dans analyse preliminaire
+    construit dans analyse préliminaire
     Le graphique compare les pays d'Asie du Sud selon le volume total
     de demandes d'asile et le nombre moyen de pays de destination
 
@@ -125,6 +125,10 @@ def plot_destinations(country):
 
 
 def affichage_country(overview_south_asia) :
+    """
+    Affiche les graphiques des cinq principales destinations annuelles (2017-2020)
+    pour chacun des pays d'origine d'Asie du Sud.
+    """
     countries = overview_south_asia["coo_name"].unique()
     for country in countries :
         plot_destinations(country)
@@ -141,7 +145,7 @@ def plot_carte_flux(south_asia,carte_url="https://minio.lab.sspcloud.fr/dchitoro
     world["iso_a3"] = world["ADM0_A3"].str.strip()
 
     # Calcul des centroïdes ( coordonnées latitude et longitude de chaque pays)
-    centroids = world.geometry.centroid
+    centroids = world.to_crs(epsg=3857).geometry.centroid.to_crs(epsg=4326)
     coords = pd.DataFrame({"iso" : world["iso_a3"], "lon" : centroids.x, "lat" : centroids.y})
 
     # On regroupe les flux sur les 4 années pour chaque pays
@@ -176,7 +180,7 @@ def plot_carte_flux(south_asia,carte_url="https://minio.lab.sspcloud.fr/dchitoro
 
     # Tracé des flèches orientées
     for x, row in flux_map.iterrows() :
-        width = 0.5 + row["refugees"] *2*10 ** (-5)  #( 1 correspondant à l'épaisseur minimale, le facteur 2*10**(-5) pour un meilleur visuel)
+        width = 0.5 + row["refugees"] *2*10 ** (-5)  #( 0.5 correspondant à l'épaisseur minimale, le facteur 2*10**(-5) pour un meilleur visuel)
         c = color_dict[row["coo_name"]]
         arrow = FancyArrowPatch(posA=(row["orig_lon"], row["orig_lat"]),posB=(row["dest_lon"], row["dest_lat"]),
             connectionstyle="arc3,rad=0.25",arrowstyle="-|>",mutation_scale=10,color=c,alpha=0.7,linewidth=width)
@@ -226,7 +230,7 @@ def plot_regression_distance_simple(south_asia):
     print("Modèle simple - Pente :", reg_simple.coef_[0])
     print("Modèle simple - R² :", reg_simple.score(x, y))
 
-    # Graphique : nuage de point et droite de régression
+    # Graphique : nuage de points et droite de régression
 
     plt.figure(figsize=(10, 6))
     plt.scatter(dist_df["distw_harmonic"], y, alpha=0.5, label="Observations")
@@ -262,7 +266,7 @@ def plot_regression_distance_log(south_asia):
     print("Modèle log-log - Pente (élasticité) :", reg_log.coef_[0])
     print("Modèle log-log - R² :", reg_log.score(x_log, y_log))
 
-    # Graphique : nuage de point et droite de régression log-log
+    # Graphique : nuage de points et droite de régression log-log
 
     plt.figure(figsize=(10, 6))
     plt.scatter(dist_df["log_dist"], y_log, alpha=0.5, label="Observations (log)")
