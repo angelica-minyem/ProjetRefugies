@@ -1,4 +1,8 @@
 *.parquet
 *.csv
+*.xlsx
 __pycache__/
 *.pyc
+.ipynb_checkpoints/
+.venv/
+.DS_Store
