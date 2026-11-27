@@ -1,14 +1,14 @@
-
-# %%
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 
 def charger_south_asia():
-    ### Cette fonction crée le dataframe south_asia à partir de df_unhcr et df_cepii. Renvoie south_asia. ###
-
+    """
+    Charge les bases nettoyées UNHCR et CEPII depuis SSP Cloud, filtre sur
+    l'Asie du Sud, effectue la jointure et calcule destination_share.
+    """
+    
     # Chargement des bases UNHCR et CEPII nettoyées depuis le stockage Onyxia
     cepii_url = "https://minio.lab.sspcloud.fr/angelik/ProjetRefugies/cepii_df.parquet"
     unhcr_url = "https://minio.lab.sspcloud.fr/angelik/ProjetRefugies/unhcr_df.parquet"
@@ -30,7 +30,7 @@ def charger_south_asia():
                 how="inner").drop(columns=["iso3_o", "iso3_d"])
 
     #Problème:les données du CEPII (et donc la jointure) contiennent des doublons. Les copies comportent un grand nombre de 
-    #données manquantes. Afin de nettoyer le base de données, création de la variable na_count, qui contient le nombre de 
+    #données manquantes. Afin de nettoyer la base de données, création de la variable na_count, qui contient le nombre de 
     #données manquantes dans chaque ligne:
 
     south_asia["na_count"] = south_asia.isna().sum(axis=1)
@@ -69,10 +69,11 @@ def charger_south_asia():
 
 
 def colonial_past():
-
-    # Analyse du facteur lien colonial
-    # Calcul du nombre de pairs pays d'Asie du Sud/pays de destination des demandeurs d'asile concernés   
-
+    """
+    Compare, pour les pays d'Asie du Sud ayant un lien colonial passé avec le
+    Royaume-Uni, la part moyenne des demandes d'asile dirigées vers ce pays
+    par rapport à la moyenne des autres destinations (2017-2020).
+    """
     south_asia = charger_south_asia()
 
     colonial_past = south_asia[south_asia["col_dep_ever"] == True].drop(columns = "col_dep_ever")
@@ -140,3 +141,115 @@ def charger_destination_shares(south_asia):
     #destination_shares.to_parquet("destination_shares.parquet", index=False)
 
 
+def scatter_plot_pib_demandes_asile(south_asia):
+    """
+    Calcule pour chaque pays d'arrivée le nombre total de réfugiés en provenance de la région étudiée arrivant dans ce pays. 
+    Met cette information dans la table data accompagnée du PIB du pays d'arrivée, dans le but de faire un graphique reliant les deux. 
+    """
+    data = south_asia.groupby(["coa_iso"]).agg(refugees_sum=pd.NamedAgg(column="refugees", aggfunc="sum"), gdp=pd.NamedAgg(column="gdpcap_d", aggfunc="max"))
+    #On représente le nombre de réfugiés provenant de la région étudiée par rapport au PIB/hab de la destination.
+    plt.figure(figsize=(10, 6))
+    graph=plt.scatter(data["gdp"],data["refugees_sum"])
+    plt.xlabel("PIB par habitant du pays destinataire (milliers de US$/hab)")
+    plt.ylabel("Nombre de demandes d'asile provenant de la région Asie du Sud")
+    plt.title("Relation entre PIB et intensité des flux migratoires")
+    plt.show()
+
+def scatter_plot_ech_log(south_asia):
+    """
+    Calcule pour chaque pays le nombre total de réfugiés en provenance de la région étudiée arrivant dans ce pays. 
+    Met cette information dans la table data accompagnée du PIB du pays d'arrivée, dans le but de faire un graphique reliant les deux. 
+    """
+    data = south_asia.groupby(["coa_iso"]).agg(refugees_sum=pd.NamedAgg(column="refugees", aggfunc="sum"), gdp=pd.NamedAgg(column="gdpcap_d", aggfunc="max"))
+    #On représente le nombre de réfugiés provenant de la région étudiée par rapport au PIB/hab de la destination.
+    plt.figure(figsize=(10, 6))
+    graph=plt.scatter(data["gdp"],data["refugees_sum"])
+    plt.xscale("log")
+    plt.yscale("log")
+    plt.xlabel("PIB par habitant du pays destinataire (milliers de US$/hab)")
+    plt.ylabel("Nombre de demandes d'asile provenant de la région Asie du Sud")
+    plt.title("Relation entre PIB et intensité des flux migratoires")
+    plt.show()
+
+
+
+def reg_lin_log_log(south_asia):
+    """
+    Calcule pour chaque pays le nombre total de réfugiés en provenance de la région étudiée arrivant dans ce pays. 
+    Met cette information dans la table data accompagnée du PIB du pays d'arrivée, dans le but de faire un graphique reliant les deux. 
+    """
+    data = south_asia.groupby(["coa_iso"]).agg(refugees_sum=pd.NamedAgg(column="refugees", aggfunc="sum"), gdp=pd.NamedAgg(column="gdpcap_d", aggfunc="max"))
+    # Régression linéaire log-log du nombre de demandes d'asile en provenance de l'Asie du Sud en fonction du PIB/hab de la destination.
+    x = np.log(data[["gdp"]]).fillna(0)
+    y = np.log(data[["refugees_sum"]]).fillna(0)
+
+    reg_log = LinearRegression()
+    reg_log.fit(x, y)
+
+    print("Modèle log-log - Constante :", reg_log.intercept_)
+    print("Modèle log - Pente :", reg_log.coef_[0])
+    print("Modèle log - R² :", reg_log.score(x, y))
+
+    # Graphique : nuage de point et droite de régression
+
+    plt.figure(figsize=(10, 6))
+    plt.scatter(x, y, alpha=0.5, label="Observations")
+    plt.plot(x, reg_log.predict(x), color="red", linewidth=2, label="Régression linéaire")
+    plt.xlabel("PIB par habitant du pays destinataire (milliers de US$/hab)")
+    plt.ylabel("Nombre de demandes d'asile provenant de la région Asie du Sud")
+    plt.title("Régression linéaire log-log : nombre de demandes d'asile en provenance de l'Asie du Sud est en fonction du PIB/hab de la destination.")
+    plt.legend()
+    plt.show()
+
+
+def analysis_by_country(south_asia,country):
+    """
+    Cette fonction prend en argument un id de pays appartenant à la région étudiée et trace le nombre de réfugiés provenant de ce pays par rapport au PIB de la destination.
+    """
+    df_country = south_asia.loc[(south_asia["coo_iso"]==country)]
+    data_country = df_country.groupby(["coa_iso"]).agg(refugees_sum=pd.NamedAgg(column="refugees", aggfunc="sum"), gdp=pd.NamedAgg(column="gdpcap_d", aggfunc="max"))
+    plt.figure(figsize=(10, 6))
+    graph=plt.scatter(data_country["gdp"],data_country["refugees_sum"])
+
+    plt.xlabel("PIB/hab du pays destinataire")
+    plt.ylabel("Nombre de demandes d'asile provenant du pays " + country)
+    plt.title("Relation entre PIB et intensité des flux migratoires")
+    plt.show()
+
+###############################
+#Etude frontière
+#On calcule le pourcentage de demandes d'asile réalisées dans un pays frontalier, par pays d'origine et par année
+# frontiere_data = south_asia[["year", "coo_name", "coa_name", "destination_share","contig"]]
+# frontiere_comm = frontiere_data.loc[frontiere_data["contig"]==True]
+# frontiere_part = frontiere_comm.groupby(["year","coo_name"])["destination_share"].sum()
+# #Graphique:
+# import matplotlib.pyplot as plt
+
+# plt.figure(figsize=(15, 6))
+
+# frontiere_part.plot(kind="bar")
+
+# plt.xlabel("Pays et année")
+# plt.ylabel("Pourcentage de demandes d'asile réalisées dans un pays connexe")
+# plt.title("Pourcentage de demandes d'asile réalisées dans un pays connexe par pays et année")
+
+# plt.show()
+
+###############################
+#Etude langue
+#On calcule le pourcentage de demandes d'asile réalisées dans un pays partageant une langue officielle, par pays d'origine et par année
+# frontiere_data = south_asia[["year", "coo_name", "coa_name", "destination_share","comlang_off"]]
+# frontiere_comm = frontiere_data.loc[frontiere_data["comlang_off"]==True]
+# frontiere_part = frontiere_comm.groupby(["year","coo_name"])["destination_share"].sum()
+# #Graphique:
+# import matplotlib.pyplot as plt
+
+# plt.figure(figsize=(15, 6))
+
+# frontiere_part.plot(kind="bar")
+
+# plt.xlabel("Pays et année")
+# plt.ylabel("Pourcentage de demandes d'asile réalisées dans un pays partageant une langue officielle")
+# plt.title("Pourcentage de demandes d'asile réalisées dans un pays partageant une langue officielle par pays et année")
+
+# plt.show()
