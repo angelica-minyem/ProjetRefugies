@@ -65,12 +65,12 @@ def charger_south_asia():
     south_asia = south_asia.drop(columns="total_refugees_origin")
     return south_asia
 
-# Analyse du facteur lien colonial
-# Calcul du nombre de pairs pays d'Asie du Sud/pays de destination des réfugiés concernés
-
 
 
 def colonial_past():
+
+    # Analyse du facteur lien colonial
+    # Calcul du nombre de pairs pays d'Asie du Sud/pays de destination des réfugiés concernés   
 
     south_asia = charger_south_asia()
 
@@ -250,66 +250,3 @@ def analysis_by_country(south_asia,country):
 # plt.title("Pourcentage de demandes d'asile réalisées dans un pays partageant une langue officielle par pays et année")
 
 # plt.show()
-
-
-###############################
-#Etude distance
-# %%
-
-def analyse_distance(south_asia):
-
-
-    # Préparation des données valides et tri par distance croissante
-    dist_df = south_asia[(south_asia["refugees"] > 0) & (south_asia["distw_harmonic"].notna())].copy()
-    dist_df = dist_df.sort_values(by="distw_harmonic")
-
-    # Régression linéaire simple du choix de la destination selon la distance
-    x = dist_df[["distw_harmonic"]]
-    y = dist_df["destination_share"]
-
-    reg_simple = LinearRegression()
-    reg_simple.fit(x, y)
-
-    print("Modèle simple - Constante :", reg_simple.intercept_)
-    print("Modèle simple - Pente :", reg_simple.coef_[0])
-    print("Modèle simple - R² :", reg_simple.score(x, y))
-
-    # Graphique : nuage de point et droite de régression
-
-    plt.figure(figsize=(10, 6))
-    plt.scatter(dist_df["distw_harmonic"], y, alpha=0.5, label="Observations")
-    plt.plot(dist_df["distw_harmonic"], reg_simple.predict(x), color="red", linewidth=2, label="Régression linéaire")
-    plt.xlabel("Distance pondérée entre pays (en km)")
-    plt.ylabel("Part des demandes d'asile choisissant la destination")
-    plt.title("Régression linéaire simple : choix de destination selon la distance")
-    plt.legend()
-    plt.show()
-
-    # Lien pas assez visible, passage en log
-
-    # Transformation logarithmique des deux variables
-    dist_df["log_dist"] = np.log(dist_df["distw_harmonic"])
-    dist_df["log_share"] = np.log(dist_df["destination_share"])
-
-    # Régression linéaire modèle log-log
-    x_log = dist_df[["log_dist"]]
-    y_log = dist_df["log_share"]
-
-    reg_log = LinearRegression()
-    reg_log.fit(x_log, y_log)
-
-    print("Modèle log-log - Constante :", reg_log.intercept_)
-    print("Modèle log-log - Pente (élasticité) :", reg_log.coef_[0])
-    print("Modèle log-log - R² :", reg_log.score(x_log, y_log))
-
-    # Graphique : nuage de point et droite de régression log-log
-
-    plt.figure(figsize=(10, 6))
-    plt.scatter(dist_df["log_dist"], y_log, alpha=0.5, label="Observations (log)")
-    plt.plot(dist_df["log_dist"], reg_log.predict(x_log), color="red", linewidth=2, label="Régression log-log")
-    plt.xlabel("Logarithme de la distance : ln(distw_harmonic)")
-    plt.ylabel("Logarithme de la part de destination : ln(destination_share)")
-    plt.title("Modèle log-log : choix de destination selon la distance")
-    plt.legend()
-    plt.show()
-# %%
