@@ -43,5 +43,11 @@ Le rapport suit une progression en trois étapes :
 
 1. Cloner le dépôt :
    ```bash
-   git clone <URL_DU_DEPOT>
-   cd <NOM_DU_DOSSIER>
+   git clone [https://github.com/angelica-minyem/ProjetRefugies.git](https://github.com/angelica-minyem/ProjetRefugies.git)
+   cd ProjetRefugies
+   ```
+2. Installer les dépendances :
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Ouvrir `main.ipynb` et exécuter toutes les cellules (*Restart & Run All*). Les données pré-nettoyées (`unhcr_df.parquet`, `cepii_df.parquet`, `destination_shares.parquet`) ainsi que le fond de carte sont chargés automatiquement depuis le stockage public SSP Cloud.
