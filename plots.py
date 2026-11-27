@@ -6,7 +6,6 @@ import numpy as np
 from matplotlib.lines import Line2D
 from matplotlib.patches import FancyArrowPatch
 from sklearn.linear_model import LinearRegression
-
 from analyse_preliminaire import create_overview, create_overview_south_asia
 
 

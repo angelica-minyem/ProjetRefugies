@@ -45,5 +45,4 @@ cepii_df['comlang_off'] = cepii_df['comlang_off'].replace(1, True)
 cepii_df['col_dep_ever'] = cepii_df['col_dep_ever'].replace(1, True)
 
 # Conversion du dataframe en fichier parquet
-
 cepii_df.to_parquet("cepii_df.parquet", index=False)
