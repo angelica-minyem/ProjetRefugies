@@ -112,33 +112,6 @@ def colonial_past():
     return colonial_past_wide
 
 
-def charger_destination_shares(south_asia):
-    ### Ajoute la colonne "destination share" au dataframe south_asia, correspondant à la part des demandeurs d'asile présente dans chaque pays de destination. Prend en argument le dataframe south_asia et renvoie le dataframe south_asia modifié.
-
-    # Calcul du nombre total de demandeurs d'asile par pays d'origine et par année,
-    # toutes destinations confondues.
-    refugees_by_origin = south_asia.groupby(["year", "coo_name"])["refugees"].sum().reset_index().rename(
-                                                columns={"refugees": "total_refugees_origin"})
-
-
-    # Ajout du nombre total de demandeurs d'asile correspondant à chaque pays d'origine
-    # et chaque année dans la base principale.
-    south_asia = south_asia.merge(refugees_by_origin, on=["year", "coo_name"])
-
-    # Calcul de la part des demandeurs d'asile présente dans chaque pays de destination.
-    south_asia["destination_share"] = south_asia["refugees"]/south_asia["total_refugees_origin"]
-
-    # Suppression de la variable intermédiaire devenue inutile.
-    south_asia = south_asia.drop(columns="total_refugees_origin")
-    return(south_asia)
-
-
-    # Sélection des variables nécessaires à l'analyse de la répartition
-    # des réfugiés entre les différents pays de destination.
-    #destination_shares = south_asia[["year", "coo_name", "coa_name", "destination_share"]]
-
-    # Conversion du dataframe obtenu en format parquet
-    #destination_shares.to_parquet("destination_shares.parquet", index=False)
 
 
 def scatter_plot_pib_demandes_asile(south_asia):
