@@ -27,7 +27,7 @@ Le rapport suit une progression en trois étapes :
 3. **Analyse des déterminants** :
    - **Distance géographique (`distw_harmonic`)** : régression linéaire simple puis modèle log-log (`scikit-learn`), mise en perspective du faible $R^2$ avec la littérature (spécificité 'ASY' vs réfugiés de masse).
    - **Richesse du pays d'accueil (`gdpcap_d`)** : nuages de points et régression log-log.
-   - **Facteurs culturels et frontaliers** : part des demandes dirigées vers un pays partageant une langue officielle (`comlang_off`), une frontière (`contig`) ou des liens historiques/religieux (`col_dep_ever`, `comrelig`).
+   - **Facteurs culturels et frontaliers** : part des demandes dirigées vers un pays partageant une langue officielle (`comlang_off`), une frontière (`contig`) ou des liens historiques (`col_dep_ever`).
 
 ## Structure du dépôt
 
